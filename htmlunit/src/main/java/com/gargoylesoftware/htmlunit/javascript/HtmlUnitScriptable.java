@@ -16,6 +16,9 @@ package com.gargoylesoftware.htmlunit.javascript;
 
 import java.lang.reflect.Method;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 import net.sourceforge.htmlunit.corejs.javascript.FunctionObject;
 import net.sourceforge.htmlunit.corejs.javascript.Scriptable;
@@ -33,6 +36,9 @@ import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
  * @author Ronald Brill
  */
 public class HtmlUnitScriptable extends ScriptableObject {
+
+    private static final Log LOG = LogFactory.getLog(HtmlUnitScriptable.class);
+
     private String className_;
 
     /**
@@ -128,10 +134,15 @@ public class HtmlUnitScriptable extends ScriptableObject {
      */
     @Override
     public void setParentScope(final Scriptable m) {
-        if (m == this) {
-            throw new IllegalArgumentException("Object can't be its own parentScope");
-        }
+        final Scriptable oldScope = getParentScope();
         super.setParentScope(m);
+
+        final Scriptable topLevelScope = getTopLevelScope(this);
+        if (topLevelScope.getParentScope() != null) {
+            LOG.warn("Detected cycle in parent scopes for window: " + this + ", ignoring the call of this setter.");
+            super.setParentScope(oldScope);
+            return;
+        }
     }
 
     /**
