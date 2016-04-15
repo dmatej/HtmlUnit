@@ -208,6 +208,16 @@ public class Window extends EventTarget implements ScriptableWithFallbackGetter,
     public Window() {
     }
 
+
+    /**
+     * @return this instance.
+     */
+    @Override
+    public Window getWindow() throws RuntimeException {
+      return this;
+    }
+
+
     /**
      * Restores the transient {@link #computedStyles_} map during deserialization.
      * @param stream the stream to read the object from
